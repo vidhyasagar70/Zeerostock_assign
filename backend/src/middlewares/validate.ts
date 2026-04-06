@@ -1,4 +1,4 @@
-import type { Request, RequestHandler } from "express";
+import type { Request, Response, NextFunction, RequestHandler } from "express";
 import { z } from "zod";
 import { ApiError } from "../utils/apiError.js";
 
@@ -16,7 +16,7 @@ export const validate = <T extends z.ZodTypeAny>(
   schema: T,
   target: ValidationTarget = "body"
 ): RequestHandler => {
-  return (req, res, next) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
     const parsed = schema.safeParse(getTargetData(req, target));
 
     if (!parsed.success) {

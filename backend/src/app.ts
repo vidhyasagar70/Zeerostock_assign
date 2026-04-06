@@ -1,5 +1,5 @@
 import cors from "cors";
-import express from "express";
+import express, { type Request, type Response } from "express";
 import morgan from "morgan";
 import { apiRouter } from "./routes/index.js";
 import { errorHandler, notFoundHandler } from "./middlewares/errorHandler.js";
@@ -7,9 +7,9 @@ import { env } from "./config/env.js";
 
 const app = express();
 
-const corsOrigins = env.corsOrigin
+const corsOrigins: string[] = env.corsOrigin
   .split(",")
-  .map((item) => item.trim())
+  .map((item: string) => item.trim())
   .filter(Boolean);
 
 app.use(
@@ -20,7 +20,7 @@ app.use(
 app.use(express.json());
 app.use(morgan("dev"));
 
-app.get("/health", (_req, res) => {
+app.get("/health", (_req: Request, res: Response): void => {
   res.status(200).json({ ok: true });
 });
 
