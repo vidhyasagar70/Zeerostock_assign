@@ -7,14 +7,37 @@ import { env } from "./config/env.js";
 
 const app = express();
 
-const corsOrigins: string[] = env.corsOrigin
+const normalizeOrigin = (value: string): string => value.replace(/\/$/, "").toLowerCase();
+
+const corsOriginPatterns: string[] = env.corsOrigin
   .split(",")
   .map((item: string) => item.trim())
-  .filter(Boolean);
+  .filter(Boolean)
+  .map((item: string) => normalizeOrigin(item));
+
+const isOriginAllowed = (origin: string): boolean => {
+  const normalizedOrigin = normalizeOrigin(origin);
+
+  return corsOriginPatterns.some((pattern: string) => {
+    if (pattern.includes("*")) {
+      const escapedPattern = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*");
+      return new RegExp(`^${escapedPattern}$`).test(normalizedOrigin);
+    }
+
+    return pattern === normalizedOrigin;
+  });
+};
 
 app.use(
   cors({
-    origin: corsOrigins.length > 0 ? corsOrigins : true
+    origin: (origin: string | undefined, callback): void => {
+      if (!origin || corsOriginPatterns.length === 0 || isOriginAllowed(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error("Not allowed by CORS"));
+    }
   })
 );
 app.use(express.json());
