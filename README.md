@@ -1,114 +1,88 @@
-# Zeerostock MERN Assignment Solution
+# Zeerostock MERN Assignment
 
-This project now uses a full MERN direction:
+Production deployment:
+
+- Frontend: https://zeerostock-assign.vercel.app/
+- Backend: https://zeerostock-jmrp.onrender.com/
+
+This project uses:
 
 - MongoDB + Mongoose
-- Express + Node.js
-- React + TypeScript
+- Express + Node.js + TypeScript
+- React + TypeScript + Vite
 
-## Run Locally
+## Features
 
-1. Backend
+- Inventory search with combined filters: q, category, minPrice, maxPrice
+- Supplier and inventory create endpoints with validation
+- Grouped inventory aggregation by supplier with total inventory value sorting
+- Robust API validation and centralized error handling
+
+## API Endpoints
+
+- GET /health
+- GET /search
+- POST /supplier
+- POST /inventory
+- GET /inventory
+- GET /inventory/grouped
+
+## Local Setup
+
+1. Start backend
 
 ```bash
 cd backend
-cp .env.example .env
+copy .env.example .env
 npm install
 npm run dev
 ```
 
-2. Frontend
+2. Start frontend
 
 ```bash
 cd frontend
+copy .env.example .env
 npm install
 npm run dev
 ```
 
-Frontend calls backend via `/api` proxy in Vite.
+3. Open app
 
-## Backend Architecture (Senior MVC)
+- http://localhost:5173
 
-Layered structure inside `backend/src`:
+Notes:
 
-- `config`: environment + MongoDB connection
-- `models`: Mongoose schemas (`Supplier`, `Inventory`)
-- `validators`: zod payload/query validation
-- `services`: business logic (`inventorySearchService`)
-- `controllers`: request orchestration and response mapping
-- `routes`: route definitions per domain
-- `middlewares`: error and not-found handlers
-- `seed`: initial data seeding for local development
-- `utils`: async wrapper and custom API error
+- In local development, frontend uses Vite proxy /api -> http://localhost:3001.
+- Backend seeds initial data automatically if inventory collection is empty.
 
-Key APIs:
+## Environment Variables
 
-- `GET /search`
-- `POST /supplier`
-- `POST /inventory`
-- `GET /inventory`
-- `GET /inventory/grouped`
+Backend .env:
 
-Rules enforced:
+- PORT=3001
+- MONGODB_URI=mongodb://127.0.0.1:27017/zeerostock
+- NODE_ENV=development
+- CORS_ORIGIN=http://localhost:5173,https://zeerostock-assign.vercel.app,https://*.vercel.app
 
-- Case-insensitive search
-- Combined filters (`q`, `category`, `minPrice`, `maxPrice`)
-- Quantity >= 0
-- Price > 0
-- Inventory must belong to a valid supplier
+Frontend .env:
 
-Required grouped query implemented:
+- VITE_API_BASE_URL=https://zeerostock-jmrp.onrender.com
 
-- `GET /inventory/grouped`
-- Group by supplier
-- Sort by total inventory value (`quantity * price`) descending
+## Deployment Configuration
 
-## Frontend Architecture (Senior Modular)
+Render backend:
 
-Layered structure inside `frontend/src`:
+- Set CORS_ORIGIN to your frontend domains.
+- Ensure MONGODB_URI points to your production MongoDB.
 
-- `api/httpClient.ts`: centralized Axios instance + interceptors
-- `api/searchApi.ts`: domain API abstraction
-- `hooks/useInventorySearch.ts`: state + validation + orchestration
-- `components/*`: presentational, reusable UI pieces
-- `types/*`: shared TypeScript interfaces
+Vercel frontend:
 
-Axios interceptor setup includes:
+- Set VITE_API_BASE_URL=https://zeerostock-jmrp.onrender.com
 
-- Request interceptor adds `x-request-id`
-- Response interceptor normalizes API errors
+## Submission Checklist
 
-UI includes:
-
-- Search input, category filter, min/max price
-- Empty state and error state
-- Search results table
-
-## MongoDB Schema
-
-Supplier collection:
-
-- `_id`
-- `name`
-- `city`
-
-Inventory collection:
-
-- `_id`
-- `supplier_id` (ObjectId ref to supplier)
-- `product_name`
-- `category`
-- `quantity`
-- `price`
-
-Relationship:
-
-- One supplier to many inventory items
-
-## Optimization Suggestion
-
-For large datasets, add pagination and caching:
-
-- Cursor-based pagination for `/search`
-- Redis cache for hot filter combinations
-- Keep indexes on `supplier_id`, `price`, `category`, and text index on `product_name`
+- Production links are added in this README.
+- Env examples are included for backend and frontend.
+- Backend CORS allows localhost and Vercel origins.
+- Repo is ready to push.
